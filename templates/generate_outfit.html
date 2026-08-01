@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Generate Outfit{% endblock %}
+{% block content %}
+<section class="card form-card">
+  <h2>What's the occasion?</h2>
+  <div class="chip-group" id="occasion-chips">
+    {% for o in ["Casual","Office","Wedding","Gym","Date","Party","University","Traditional Event"] %}
+    <button class="chip-btn" data-occasion="{{o}}">{{o}}</button>
+    {% endfor %}
+  </div>
+
+  <div class="custom-occasion" style="margin-top:12px;">
+    <input type="text" id="custom-occasion-input" placeholder="Or type your own occasion — e.g. Eid, Christmas dinner, job interview..." style="width:100%;" />
+  </div>
+
+  <button id="mic-btn" class="icon-btn" title="Speak instead">🎤</button>
+  <p id="voice-transcript"></p>
+</section>
+
+<section class="card" style="margin-top:20px;">
+  <h3>Which clothes do you have with you right now?</h3>
+  <p class="subtle">Only checked items will be considered. Leave all unchecked to use your full wardrobe.</p>
+  <div class="toolbar">
+    <button id="select-all-btn" class="btn-secondary">Select All</button>
+    <button id="clear-all-btn" class="btn-secondary">Clear All</button>
+  </div>
+
+  <div id="available-items-container">
+    <h4>Upper Wear</h4>
+    <div id="available-items-upper" class="card-grid"></div>
+
+    <h4>Lower Wear</h4>
+    <div id="available-items-lower" class="card-grid"></div>
+
+    <h4>Footwear</h4>
+    <div id="available-items-footwear" class="card-grid"></div>
+
+    <h4>Accessories</h4>
+    <div id="available-items-accessories" class="card-grid"></div>
+  </div>
+</section>
+
+<button id="generate-btn" class="btn-primary" disabled style="margin-top:20px;">Generate Outfit</button>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+<script src="{{ url_for('static', filename='js/outfit.js') }}"></script>
+{% endblock %}

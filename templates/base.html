@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}WardrobeAI{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="logo">WardrobeAI</a>
+    <div class="nav-links">
+      {% if session.get('user_id') %}
+      <a href="/dashboard">Dashboard</a>
+      <a href="/wardrobe">Wardrobe</a>
+      <a href="/generate-outfit">Generate</a>
+      <a href="/history">History</a>
+      <a href="/settings">Settings</a>
+      <button id="theme-toggle" class="icon-btn">🌙</button>
+      <button id="logout-btn" class="btn-secondary">Log out</button>
+      {% else %}
+      <a href="/login">Log in</a>
+      <a href="/signup" class="btn-primary">Sign Up</a>
+      {% endif %}
+    </div>
+  </nav>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

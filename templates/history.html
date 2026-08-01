@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<section>
+  <h2>Outfit History</h2>
+  <div id="history-list" class="card-grid"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+fetch("/api/history").then(r => r.json()).then(data => {
+  const list = document.getElementById("history-list");
+  (data.history || []).forEach(h => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `<h4>${h.occasion}</h4><p>Worn on ${h.worn_on}</p>`;
+    list.appendChild(el);
+  });
+});
+</script>
+{% endblock %}

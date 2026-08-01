@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<section class="card form-card">
+  <h2>Your Profile</h2>
+  <form id="profile-form">
+    <label>Gender</label>
+    <select name="gender">
+      <option>Male</option><option>Female</option>
+    </select>
+
+    <label>Height</label>
+    <select name="height">
+      <option>Below 5'4"</option>
+      <option>5'4" - 5'8"</option>
+      <option>5'9" - 6'0"</option>
+      <option>Above 6'0"</option>
+    </select>
+
+    <label>Skin Tone</label>
+    <select name="skin_tone">
+      <option>Fair</option><option>Light</option><option>Medium</option>
+      <option>Olive</option><option>Tan</option><option>Dark</option>
+    </select>
+
+    <label>Country</label>
+    <input type="text" name="country" />
+
+    <label>City</label>
+    <input type="text" name="city" />
+
+    <label>Preferred Style</label>
+    <select name="preferred_style">
+      <option>Casual</option><option>Old Money</option><option>Streetwear</option>
+      <option>Formal</option><option>Business Casual</option><option>Traditional</option>
+      <option>Minimalist</option><option>Smart Casual</option>
+    </select>
+
+    <label>Favorite Colors</label>
+    <div class="chip-group" id="color-chips">
+      {% for c in ["Black","White","Navy","Grey","Beige","Olive","Brown","Red","Blue"] %}
+      <label class="chip"><input type="checkbox" name="favorite_colors" value="{{c}}"> {{c}}</label>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn-primary">Save Profile Changes</button>
+  </form>
+</section>
+
+<section class="card form-card" style="margin-top:24px;">
+  <h2>App Settings</h2>
+
+  <label>Groq API Key</label>
+  <input type="password" id="api-key-input" placeholder="gsk_..." />
+  <button id="save-key-btn" class="btn-secondary">Save Key</button>
+
+  <hr />
+  <button id="export-btn" class="btn-secondary">Export Wardrobe</button>
+  <label class="btn-secondary">
+    Import Wardrobe <input type="file" id="import-input" accept="application/json" hidden />
+  </label>
+
+  <hr />
+  <button id="delete-wardrobe-btn" class="btn-danger">Delete Entire Wardrobe</button>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+// --- Load existing profile and pre-fill the form ---
+(async () => {
+  const res = await fetch("/api/profile");
+  const data = await res.json();
+  if (!data.success) return;
+  const p = data.profile;
+  const form = document.getElementById("profile-form");
+  form.gender.value = p.gender || "Male";
+  form.height.value = p.height || "";
+  form.skin_tone.value = p.skin_tone || "";
+  form.country.value = p.country || "";
+  form.city.value = p.city || "";
+  form.preferred_style.value = p.preferred_style || "";
+  const favColors = (p.favorite_colors || "").split(",");
+  form.querySelectorAll('input[name="favorite_colors"]').forEach(cb => {
+    cb.checked = favColors.includes(cb.value);
+  });
+})();
+
+document.getElementById("profile-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const favorite_colors = Array.from(
+    form.querySelectorAll('input[name="favorite_colors"]:checked')
+  ).map(el => el.value);
+
+  const payload = {
+    gender: form.gender.value, height: form.height.value, skin_tone: form.skin_tone.value,
+    country: form.country.value, city: form.city.value,
+    preferred_style: form.preferred_style.value, favorite_colors,
+  };
+
+  const res = await fetch("/api/profile", {
+    method: "PUT", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  alert(data.success ? "Profile updated." : "Could not save changes.");
+});
+
+// --- Existing settings handlers ---
+document.getElementById("save-key-btn").onclick = async () => {
+  const key = document.getElementById("api-key-input").value;
+  await fetch("/api/settings/api-key", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({api_key: key})
+  });
+  alert("API key saved.");
+};
+
+document.getElementById("export-btn").onclick = async () => {
+  const res = await fetch("/api/settings/export");
+  const data = await res.json();
+  const blob = new Blob([JSON.stringify(data.wardrobe, null, 2)], {type: "application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "wardrobe_export.json";
+  a.click();
+};
+
+document.getElementById("import-input").onchange = async (e) => {
+  const file = e.target.files[0];
+  const text = await file.text();
+  await fetch("/api/settings/import", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({wardrobe: JSON.parse(text)})
+  });
+  alert("Wardrobe imported.");
+};
+
+document.getElementById("delete-wardrobe-btn").onclick = async () => {
+  if (!confirm("This will delete your entire wardrobe. Continue?")) return;
+  await fetch("/api/settings/delete-wardrobe", {method: "DELETE"});
+  alert("Wardrobe deleted.");
+};
+</script>
+{% endblock %}

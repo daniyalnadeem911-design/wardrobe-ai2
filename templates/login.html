@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Log In{% endblock %}
+{% block content %}
+<section class="card form-card">
+  <h2>Log in</h2>
+  <form id="login-form">
+    <label>Username</label>
+    <input type="text" name="username" required autocomplete="username" />
+    <label>Password</label>
+    <input type="password" name="password" required autocomplete="current-password" />
+    <button type="submit" class="btn-primary">Log In</button>
+    <p id="login-error" class="subtle" style="color:#c0392b;"></p>
+  </form>
+  <p class="subtle">New here? <a href="/signup">Create an account</a></p>
+</section>
+{% endblock %}

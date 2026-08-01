@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="dashboard-grid">
+  <div class="card action-card" onclick="location.href='/wardrobe'">
+    <h3>👕 My Wardrobe</h3>
+    <p>View and manage all your saved clothes.</p>
+  </div>
+  <div class="card action-card" onclick="location.href='/generate-outfit'">
+    <h3>✨ Generate Outfit</h3>
+    <p>Get an AI-picked outfit for any occasion.</p>
+  </div>
+  <div class="card action-card" id="add-clothes-card">
+    <h3>➕ Add Clothes</h3>
+    <p>Upload an image or import a PDF of your clothes.</p>
+    <div class="add-options">
+      <label class="btn-secondary">
+        Upload Image <input type="file" id="image-input" accept="image/*" hidden />
+      </label>
+      <label class="btn-secondary">
+        Import PDF <input type="file" id="pdf-input" accept="application/pdf" hidden />
+      </label>
+    </div>
+    <p id="upload-status"></p>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/wardrobe.js') }}"></script>
+{% endblock %}

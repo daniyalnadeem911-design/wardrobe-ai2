@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}My Wardrobe{% endblock %}
+{% block content %}
+<section>
+  <div class="toolbar">
+    <input type="text" id="search-input" placeholder="Search wardrobe..." />
+    <select id="category-filter">
+      <option value="">All Categories</option>
+    </select>
+  </div>
+
+  <h3>Upper Wear</h3>
+  <div id="wardrobe-grid-upper" class="card-grid"></div>
+
+  <h3>Lower Wear</h3>
+  <div id="wardrobe-grid-lower" class="card-grid"></div>
+
+  <h3>Footwear</h3>
+  <div id="wardrobe-grid-footwear" class="card-grid"></div>
+
+  <h3>Accessories</h3>
+  <div id="wardrobe-grid-accessories" class="card-grid"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/wardrobe.js') }}"></script>
+{% endblock %}

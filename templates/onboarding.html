@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Set Up Your Profile{% endblock %}
+{% block content %}
+<section class="card form-card">
+  <h2>Tell us about you</h2>
+  <form id="onboarding-form">
+    <label>Gender</label>
+    <select name="gender">
+      <option>Male</option>
+      <option>Female</option>
+    </select>
+
+    <label>Height</label>
+    <select name="height">
+      <option>Below 5'4"</option>
+      <option>5'4" - 5'8"</option>
+      <option>5'9" - 6'0"</option>
+      <option>Above 6'0"</option>
+    </select>
+
+    <label>Skin Tone</label>
+    <select name="skin_tone">
+      <option>Fair</option><option>Light</option><option>Medium</option>
+      <option>Olive</option><option>Tan</option><option>Dark</option>
+    </select>
+
+    <label>Country</label>
+    <input type="text" name="country" placeholder="e.g. Pakistan" />
+
+    <label>City</label>
+    <input type="text" name="city" placeholder="e.g. Faisalabad" />
+
+    <label>Preferred Style</label>
+    <select name="preferred_style">
+      <option>Casual</option><option>Old Money</option><option>Streetwear</option>
+      <option>Formal</option><option>Business Casual</option><option>Traditional</option>
+      <option>Minimalist</option><option>Smart Casual</option>
+    </select>
+
+    <label>Favorite Colors</label>
+    <div class="chip-group" id="color-chips">
+      {% for c in ["Black","White","Navy","Grey","Beige","Olive","Brown","Red","Blue"] %}
+      <label class="chip"><input type="checkbox" name="favorite_colors" value="{{c}}"> {{c}}</label>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn-primary">Save Profile</button>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/onboarding.js') }}"></script>
+{% endblock %}

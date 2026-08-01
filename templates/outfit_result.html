@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Your Outfit{% endblock %}
+{% block content %}
+<section>
+  <h2>Today's Pick</h2>
+  <p id="weather-summary" class="subtle"></p>
+  <p id="occasion-summary" class="subtle"></p>
+  <p id="overall-reasoning" class="card" style="padding:12px; margin:12px 0;"></p>
+  <div id="outfit-grid" class="card-grid"></div>
+  <div class="actions">
+    <button id="favorite-btn" class="btn-secondary">♥ Save to Favorites</button>
+    <button id="wear-btn" class="btn-primary">Mark as Worn</button>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/outfit.js') }}"></script>
+{% endblock %}
