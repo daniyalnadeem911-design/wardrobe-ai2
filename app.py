@@ -7,6 +7,7 @@ from routes.onboarding_routes import onboarding_bp
 from routes.wardrobe_routes import wardrobe_bp
 from routes.outfit_routes import outfit_bp
 from routes.settings_routes import settings_bp
+from flask import Response
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -21,6 +22,21 @@ app.register_blueprint(settings_bp)
 # triggers it too on Render.
 init_db()
 
+
+@app.route("/robots.txt")
+def robots():
+    content = "User-agent: *\nAllow: /\nAllow: /login\nAllow: /signup\nDisallow: /dashboard\nDisallow: /wardrobe\nDisallow: /generate-outfit\nDisallow: /history\nDisallow: /settings\nSitemap: https://daniyal11223344.pythonanywhere.com/sitemap.xml"
+    return Response(content, mimetype="text/plain")
+
+@app.route("/sitemap.xml")
+def sitemap():
+    content = '''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://daniyal11223344.pythonanywhere.com/</loc></url>
+  <url><loc>https://daniyal11223344.pythonanywhere.com/login</loc></url>
+  <url><loc>https://daniyal11223344.pythonanywhere.com/signup</loc></url>
+</urlset>'''
+    return Response(content, mimetype="application/xml")
 
 @app.route("/")
 def home():
