@@ -8,6 +8,7 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "dev-secret-key")
     GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+    SIGNUP_INVITE_CODE = os.getenv("SIGNUP_INVITE_CODE", "")
     TURSO_DATABASE_URL = os.getenv("TURSO_DATABASE_URL", "")
     TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN", "")
     UPLOAD_FOLDER = os.path.join(tempfile.gettempdir(), "wardrobe_scratch")

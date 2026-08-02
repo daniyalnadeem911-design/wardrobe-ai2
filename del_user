@@ -1,0 +1,32 @@
+go to console and open bash
+
+cd ~/wardrobe-ai
+source ~/.virtualenvs/wardrobe-venv/bin/activate
+python3
+from models.db import query
+query("SELECT id, username FROM users", fetchone=False)
+
+it shows like this :    {'id': 2, 'username': 'm.saqlain haider'}
+
+now check the id no and paste the folowing
+
+nano kick_user.py
+
+from models.db import query
+
+uid = 2    ==>  here put the user id no.
+query("DELETE FROM wardrobe WHERE user_id=?", (uid,), commit=True)
+query("DELETE FROM outfits WHERE user_id=?", (uid,), commit=True)
+query("DELETE FROM users WHERE id=?", (uid,), commit=True)
+print(f"Kicked user {uid}.")
+
+then
+Save: Ctrl+O, Enter. Exit: Ctrl+X.
+
+then run this in same bash
+python3 kick_user.py
+
+Should print Kicked user 2. — confirms done.
+
+Reload app: Web tab → your app → green Reload button
+(not strictly required since this hit DB directly, but do it anyway to be safe).

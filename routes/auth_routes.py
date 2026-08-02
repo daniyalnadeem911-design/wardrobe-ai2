@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from models.db import query
+from config import Config
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -9,6 +10,10 @@ def signup():
     data = request.json or {}
     username = (data.get("username") or "").strip().lower()
     password = data.get("password") or ""
+    invite_code = data.get("invite_code") or ""
+
+    if invite_code != Config.SIGNUP_INVITE_CODE or not Config.SIGNUP_INVITE_CODE:
+        return jsonify({"success": False, "error": "Invalid invite code."}), 403
 
     if not username or not password:
         return jsonify({"success": False, "error": "Username and password are required."}), 400
