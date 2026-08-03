@@ -29,9 +29,8 @@ if (loginForm) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        username: signupForm.username.value.trim(),
-        password: signupForm.password.value,
-        invite_code: signupForm.invite_code.value.trim(),
+        username: loginForm.username.value.trim(),
+        password: loginForm.password.value,
       }),
     });
     const data = await res.json();
