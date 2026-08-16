@@ -4,6 +4,12 @@ from prompts.image_analysis_prompt import IMAGE_ANALYSIS_SYSTEM_PROMPT
 from prompts.outfit_generation_prompt import OUTFIT_SYSTEM_PROMPT
 from services.image_service import encode_image_base64
 
+# NOTE: Groq deprecates/renames models periodically.
+# If you get a "model_decommissioned" error, check https://console.groq.com/docs/models
+# and swap the strings below — nothing else needs to change.
+VISION_MODEL = "qwen/qwen3.6-27b"
+TEXT_MODEL = "openai/gpt-oss-120b"
+
 def get_client(api_key):
     return Groq(api_key=api_key)
 
@@ -12,7 +18,7 @@ def analyze_clothing_image(api_key, image_path):
     b64_image = encode_image_base64(image_path)
 
     response = client.chat.completions.create(
-        model="qwen/qwen3.6-27b",
+        model=VISION_MODEL,
         messages=[
             {"role": "system", "content": IMAGE_ANALYSIS_SYSTEM_PROMPT},
             {
@@ -25,7 +31,7 @@ def analyze_clothing_image(api_key, image_path):
         ],
         temperature=0.3,
         max_tokens=500,
-        reasoning_effort="none",
+        reasoning_effort="none",  # forces clean JSON, no "thinking" text before it
     )
     raw = response.choices[0].message.content.strip()
     raw = raw.replace("```json", "").replace("```", "").strip()
@@ -42,7 +48,7 @@ TEXT:
 {pdf_text}
 """
     response = client.chat.completions.create(
-        model="openai/gpt-oss-120b",
+        model=TEXT_MODEL,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2,
         max_tokens=2000,
@@ -60,13 +66,14 @@ Occasion: {occasion}
 Available items (ONLY choose from these): {json.dumps(wardrobe_items)}
 """
     response = client.chat.completions.create(
-        model="openai/gpt-oss-120b",
+        model=TEXT_MODEL,
         messages=[
             {"role": "system", "content": OUTFIT_SYSTEM_PROMPT},
             {"role": "user", "content": user_context},
         ],
         temperature=0.5,
-        max_tokens=2000,  # was 800 — too small once >10 items each need a reasoning sentence
+        max_tokens=3000,  # v9: raised from 2000 — now asking for up to 3 full combinations
+        # (each with its own reasoning dict + overall_reasoning) in one response.
     )
     raw = response.choices[0].message.content.strip()
     raw = raw.replace("```json", "").replace("```", "").strip()
@@ -74,19 +81,21 @@ Available items (ONLY choose from these): {json.dumps(wardrobe_items)}
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
-        # The model's reply got cut off mid-JSON (usually because the reasoning
-        # dict grew too large for max_tokens). Retry once, telling it to keep
-        # per-item reasons very short so the whole response fits.
-        retry_context = user_context + "\n\nIMPORTANT: Keep every reasoning sentence under 12 words. Keep the whole JSON response compact."
+        # The model's reply got cut off mid-JSON (usually because 3 combinations'
+        # worth of reasoning grew too large for max_tokens). Retry once, telling
+        # it to keep everything short so the whole response fits.
+        retry_context = user_context + "\n\nIMPORTANT: Keep every reasoning sentence under 12 words and every overall_reasoning under 2 short sentences, so all outfit options fit in the response."
         response = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model=TEXT_MODEL,
             messages=[
                 {"role": "system", "content": OUTFIT_SYSTEM_PROMPT},
                 {"role": "user", "content": retry_context},
             ],
             temperature=0.3,
-            max_tokens=2000,
+            max_tokens=3000,
         )
         raw = response.choices[0].message.content.strip()
         raw = raw.replace("```json", "").replace("```", "").strip()
-        return json.loads(raw)  # if this still fails, it'll raise and your existing except-block in outfit_routes.py catches it and prints the traceback
+        return json.loads(raw)  # if this still fails, it raises and the existing
+        # except-block in outfit_routes.py catches it, prints the traceback, and
+        # returns the friendly "internet_error" message to the user

@@ -26,7 +26,8 @@ def generate():
         (user_id,),
     )
 
-    # NEW: restrict to only the pieces the user marked as available
+    # Only reason over items the user marked as currently available.
+    # Empty selection = fall back to the full wardrobe.
     if available_item_ids:
         items = [i for i in all_items if i["id"] in available_item_ids]
     else:
@@ -41,40 +42,76 @@ def generate():
 
     try:
         result = generate_outfit(api_key, profile, weather, occasion, items)
-    except Exception as e:
+    except Exception:
         import traceback
         traceback.print_exc()
-        return jsonify({"success": False, "error": f"{type(e).__name__}: {e}"}), 500
+        return jsonify({"success": False, "error": friendly_error("internet_error")}), 500
 
-    # (rest of the function stays exactly the same — outfit_id insert + outfit_items build)
+    # v9: the AI now returns up to 3 ranked combinations under "outfits" instead of
+    # one combination at the top level. This fallback keeps things working even if
+    # the model ever slips back to the old single-object shape.
+    raw_options = result.get("outfits") or (
+        [result] if (result.get("upper_id") or result.get("lower_id")) else []
+    )
+
+    options = []
+    for opt in raw_options[:3]:
+        outfit_items = []
+        for key in ["upper_id", "lower_id", "footwear_id", "accessory_id", "jacket_id"]:
+            item_id = opt.get(key)
+            if item_id:
+                item = query("SELECT * FROM wardrobe WHERE id=?", (item_id,), fetchone=True)
+                if item:
+                    item["reason"] = opt.get("reasoning", {}).get(str(item_id), "")
+                    outfit_items.append(item)
+        options.append({
+            "upper_id": opt.get("upper_id"),
+            "lower_id": opt.get("lower_id"),
+            "footwear_id": opt.get("footwear_id"),
+            "accessory_id": opt.get("accessory_id"),
+            "jacket_id": opt.get("jacket_id"),
+            "reasoning": opt.get("reasoning", {}),
+            "overall_reasoning": opt.get("overall_reasoning", ""),
+            "items": outfit_items,
+        })
+
+    if not options:
+        return jsonify({"success": False, "error": friendly_error("internet_error")}), 500
+
+    # v9: NOTHING is saved to the database yet. Saving now happens only when the
+    # user taps "Choose This Outfit" on one specific option — see /api/outfit/choose
+    # below. This is the actual fix for "only one suggestion, no way to pick."
+    return jsonify({
+        "success": True,
+        "weather": weather,
+        "occasion": occasion,
+        "options": options,
+    })
+
+@outfit_bp.route("/api/outfit/choose", methods=["POST"])
+def choose():
+    # v9 NEW ROUTE. Called once, when the user taps "Choose This Outfit" on one
+    # of the (up to 3) options returned by /api/outfit/generate above. This is
+    # where a row actually gets written to the `outfits` table.
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"success": False, "error": "not_onboarded"}), 401
+
+    data = request.json
+    occasion = data.get("occasion", "Casual")
+    weather = data.get("weather", {})
+
     outfit_id = query(
         """INSERT INTO outfits (user_id, occasion, weather_summary, upper_id, lower_id,
            footwear_id, accessory_id, jacket_id, reasoning) VALUES (?,?,?,?,?,?,?,?,?)""",
         (
             user_id, occasion, json.dumps(weather),
-            result.get("upper_id"), result.get("lower_id"), result.get("footwear_id"),
-            result.get("accessory_id"), result.get("jacket_id"), json.dumps(result.get("reasoning", {})),
+            data.get("upper_id"), data.get("lower_id"), data.get("footwear_id"),
+            data.get("accessory_id"), data.get("jacket_id"), json.dumps(data.get("reasoning", {})),
         ),
         commit=True,
     )
-
-    outfit_items = []
-    for key in ["upper_id", "lower_id", "footwear_id", "accessory_id", "jacket_id"]:
-        item_id = result.get(key)
-        if item_id:
-            item = query("SELECT * FROM wardrobe WHERE id=?", (item_id,), fetchone=True)
-            if item:
-                item["reason"] = result.get("reasoning", {}).get(str(item_id), "")
-                outfit_items.append(item)
-
-    return jsonify({
-        "success": True,
-        "outfit_id": outfit_id,
-        "weather": weather,
-        "occasion": occasion,
-        "overall_reasoning": result.get("overall_reasoning", ""),
-        "items": outfit_items,
-    })
+    return jsonify({"success": True, "outfit_id": outfit_id})
 
 @outfit_bp.route("/api/outfit/<int:outfit_id>/favorite", methods=["POST"])
 def favorite(outfit_id):

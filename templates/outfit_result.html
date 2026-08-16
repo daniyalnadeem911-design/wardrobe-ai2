@@ -2,15 +2,10 @@
 {% block title %}Your Outfit{% endblock %}
 {% block content %}
 <section>
-  <h2>Today's Pick</h2>
+  <h2>Pick Your Outfit</h2>
   <p id="weather-summary" class="subtle"></p>
   <p id="occasion-summary" class="subtle"></p>
-  <p id="overall-reasoning" class="card" style="padding:12px; margin:12px 0;"></p>
-  <div id="outfit-grid" class="card-grid"></div>
-  <div class="actions">
-    <button id="favorite-btn" class="btn-secondary">♥ Save to Favorites</button>
-    <button id="wear-btn" class="btn-primary">Mark as Worn</button>
-  </div>
+  <div id="options-container"></div>
 </section>
 {% endblock %}
 {% block scripts %}

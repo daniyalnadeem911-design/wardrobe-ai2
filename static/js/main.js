@@ -1,4 +1,3 @@
-// Theme toggle — persisted in a cookie-free way via localStorage-free session flag
 const themeBtn = document.getElementById("theme-toggle");
 
 function applyTheme(theme) {
@@ -6,8 +5,6 @@ function applyTheme(theme) {
   if (themeBtn) themeBtn.textContent = theme === "dark" ? "☀️" : "🌙";
 }
 
-// Initial theme from data attribute set server-side would be ideal;
-// fallback to system preference for first load.
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 applyTheme(prefersDark ? "dark" : "light");
 
@@ -20,5 +17,19 @@ if (themeBtn) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ theme: newTheme }),
     });
+  });
+}
+
+// v9: mobile hamburger menu toggle
+const navToggle = document.getElementById("nav-toggle");
+const navLinks = document.getElementById("nav-links");
+if (navToggle && navLinks) {
+  navToggle.addEventListener("click", () => {
+    navLinks.classList.toggle("open");
+  });
+  // Auto-close the menu after tapping a link, so it doesn't stay open
+  // when the new page loads.
+  navLinks.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => navLinks.classList.remove("open"));
   });
 }

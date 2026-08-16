@@ -99,3 +99,52 @@ body {
 .actions { display: flex; gap: 12px; margin-top: 24px; }
 
 hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+/* ===== v9: mobile & tablet responsiveness ===== */
+html, body { max-width: 100%; overflow-x: hidden; }
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.option-card h3 { margin-top: 0; }
+.overall-reasoning { color: var(--subtle); margin: 8px 0 4px; }
+
+@media (max-width: 768px) {
+  .navbar { flex-wrap: wrap; padding: 14px 16px; }
+  .nav-toggle { display: block; }
+  .nav-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { padding: 10px 0; text-align: center; opacity: 1; border-top: 1px solid var(--border); }
+  .nav-links .btn-primary,
+  .nav-links .btn-secondary { width: 100%; text-align: center; margin: 0; }
+  .nav-links .icon-btn { align-self: center; }
+
+  .container { padding: 24px 16px; }
+  .hero { padding: 60px 16px; }
+  .hero h1 { font-size: 30px; }
+
+  .card { padding: 18px; }
+  .card-grid { grid-template-columns: 1fr; gap: 14px; }
+
+  .toolbar { flex-wrap: wrap; }
+  .toolbar button { flex: 1 1 auto; }
+
+  .actions { flex-direction: column; }
+  .actions button { width: 100%; }
+
+  .form-card { max-width: 100%; }
+}

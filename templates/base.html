@@ -4,14 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}WardrobeAI — Your Personal AI Wardrobe Assistant{% endblock %}</title>
-  <meta name="google-site-verification" content="AZ8vNec2div6QfVq4VlbBezEQo8cjL5_xiVhS0vXlEc" />
+  <meta name="description" content="WardrobeAI analyzes your clothes and generates outfit recommendations based on occasion, weather, and your style — powered by AI." />
+  <meta name="google-site-verification" content="YOUR_REAL_VERIFICATION_CODE_HERE" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}" />
 </head>
 <body>
   <nav class="navbar">
     <a href="/" class="logo">WardrobeAI</a>
-    <div class="nav-links">
+    <button id="nav-toggle" class="nav-toggle" aria-label="Open menu">☰</button>
+    <div class="nav-links" id="nav-links">
       {% if session.get('user_id') %}
       <a href="/dashboard">Dashboard</a>
       <a href="/wardrobe">Wardrobe</a>
