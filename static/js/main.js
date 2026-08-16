@@ -1,12 +1,12 @@
 const themeBtn = document.getElementById("theme-toggle");
 
+// v10: <body> already arrives with the correct "dark" class from the server
+// (see app.py's inject_theme + base.html), so this only needs to run when
+// the button is actually clicked — no more checking the OS theme on every
+// page load, which was the thing silently overriding your saved choice.
 function applyTheme(theme) {
   document.body.classList.toggle("dark", theme === "dark");
-  if (themeBtn) themeBtn.textContent = theme === "dark" ? "☀️" : "🌙";
 }
-
-const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-applyTheme(prefersDark ? "dark" : "light");
 
 if (themeBtn) {
   themeBtn.addEventListener("click", async () => {
@@ -27,8 +27,6 @@ if (navToggle && navLinks) {
   navToggle.addEventListener("click", () => {
     navLinks.classList.toggle("open");
   });
-  // Auto-close the menu after tapping a link, so it doesn't stay open
-  // when the new page loads.
   navLinks.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => navLinks.classList.remove("open"));
   });

@@ -56,7 +56,7 @@ body {
 .btn-danger { background: #fdecec; color: #c0392b; border: 1px solid #f5c6c6;
   padding: 12px 22px; border-radius: 999px; cursor: pointer; }
 
-.icon-btn { background: none; border: none; font-size: 18px; cursor: pointer; }
+.icon-btn { background: none; border: none; font-size: 18px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 
 .card {
   background: var(--card-bg);

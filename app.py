@@ -1,13 +1,12 @@
 import os
-from flask import Flask, render_template, session, redirect, url_for
+from flask import Flask, render_template, session, redirect, url_for, Response
 from config import Config
-from models.db import init_db
+from models.db import init_db, query
 from routes.auth_routes import auth_bp
 from routes.onboarding_routes import onboarding_bp
 from routes.wardrobe_routes import wardrobe_bp
 from routes.outfit_routes import outfit_bp
 from routes.settings_routes import settings_bp
-from flask import Response
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -18,15 +17,31 @@ app.register_blueprint(wardrobe_bp)
 app.register_blueprint(outfit_bp)
 app.register_blueprint(settings_bp)
 
-# Runs at import time now (not just under `python app.py`) so gunicorn
-# triggers it too on Render.
+# Runs at import time now (not just under `python app.py`) so any
+# production WSGI import (PythonAnywhere's WSGI file included) triggers it too.
 init_db()
+
+
+@app.context_processor
+def inject_theme():
+    # v10: makes the logged-in user's SAVED theme available to every template
+    # as `page_theme`, so base.html can put "dark" on <body> before the page
+    # even renders. This is the actual fix for dark mode resetting on every
+    # page — the old code never looked at the saved value, only the OS setting.
+    theme = "light"
+    user_id = session.get("user_id")
+    if user_id:
+        user = query("SELECT theme FROM users WHERE id=?", (user_id,), fetchone=True)
+        if user and user.get("theme"):
+            theme = user["theme"]
+    return {"page_theme": theme}
 
 
 @app.route("/robots.txt")
 def robots():
     content = "User-agent: *\nAllow: /\nAllow: /login\nAllow: /signup\nDisallow: /dashboard\nDisallow: /wardrobe\nDisallow: /generate-outfit\nDisallow: /history\nDisallow: /settings\nSitemap: https://daniyal11223344.pythonanywhere.com/sitemap.xml"
     return Response(content, mimetype="text/plain")
+
 
 @app.route("/sitemap.xml")
 def sitemap():
@@ -37,6 +52,7 @@ def sitemap():
   <url><loc>https://daniyal11223344.pythonanywhere.com/signup</loc></url>
 </urlset>'''
     return Response(content, mimetype="application/xml")
+
 
 @app.route("/")
 def home():
